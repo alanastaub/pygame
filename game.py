@@ -3,7 +3,7 @@ import sys
 import sound
 import settings
 import random
-from enemies import initialize_enemies, draw_enemies, update_enemies
+from enemies import initialize_enemies, draw_enemies, update_enemies, check_bullet_collision
 
 pygame.init()
 
@@ -52,7 +52,7 @@ def start_game():
     character_speed = 5
     bullets = []
     last_shot = 0
-    shoot_delay = 500
+    shoot_delay = 200
 
     running = True
     while running:
@@ -61,11 +61,11 @@ def start_game():
                 running = False
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and character_x - character_speed >= 0:
+        if keys[pygame.K_LEFT] and character_x - character_speed >= -40:
             character_x -= character_speed
-        if keys[pygame.K_RIGHT] and character_x + character_speed + 100 <= WIDTH:
+        if keys[pygame.K_RIGHT] and character_x + character_speed + 60 <= WIDTH:
             character_x += character_speed
-        if keys[pygame.K_UP] and character_y - character_speed >= 0:
+        if keys[pygame.K_UP] and character_y - character_speed >= -10:
             character_y -= character_speed
         if keys[pygame.K_DOWN] and character_y + character_speed + 100 <= HEIGHT:
             character_y += character_speed
@@ -83,7 +83,8 @@ def start_game():
 
         bullets = [bullet for bullet in bullets if bullet[1] > 0]
 
-        update_enemies(enemies, speed=1)
+        check_bullet_collision(bullets, enemies)
+        update_enemies(enemies, speed=0.5)
 
         screen.blit(new_background_image, (0, 0))
         screen.blit(rocket, (character_x, character_y))

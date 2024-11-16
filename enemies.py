@@ -15,4 +15,17 @@ def draw_enemies(enemies, screen):
 
 def update_enemies(enemies, speed):
     for enemy in enemies:
-        enemy["y"] += speed
+        enemy['y'] += speed
+        if enemy['lives'] <= 0:
+            enemies.remove(enemy)
+
+def check_bullet_collision(bullets, enemies):
+    for bullet in bullets:
+        for enemy in enemies:
+            if enemy['x'] < bullet[0] < enemy['x'] + enemy['image'].get_width() and \
+               enemy['y'] < bullet[1] < enemy['y'] + enemy['image'].get_height():
+                enemy['lives'] -= 1
+                bullets.remove(bullet)
+                if enemy['lives'] <= 0:
+                    enemies.remove(enemy)
+                break

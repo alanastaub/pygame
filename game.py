@@ -3,6 +3,7 @@ import sys
 import sound
 import settings
 import random
+from enemies import initialize_enemies, draw_enemies, update_enemies
 
 pygame.init()
 
@@ -17,6 +18,10 @@ button_font = pygame.font.Font(None, 30)
 
 background_image = pygame.image.load(settings.Images.background_home)
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+
+enemy_image = pygame.image.load(settings.Images.enemy)
+enemy_image = pygame.transform.scale(enemy_image, (50, 50))
+enemies = initialize_enemies(10, enemy_image, WIDTH, HEIGHT)
 
 def draw_button(text, x, y, width, height, color, hover_color, action=None):
     click_sound = pygame.mixer.Sound(settings.Sounds.click)
@@ -43,26 +48,19 @@ def start_game():
 
     rocket = pygame.image.load(settings.Images.rocket)
     rocket = pygame.transform.scale(rocket, (100, 100))
-
-    character_x = WIDTH // 2 - 50
-    character_y = 500
+    character_x, character_y = WIDTH // 2, HEIGHT - 100
     character_speed = 5
-
-    # Lista para armazenar os tiros
     bullets = []
+    last_shot = 0
+    shoot_delay = 500
 
-    # Temporizador para controlar a taxa de disparo
-    shoot_delay = 250  # Tempo em milissegundos entre os disparos
-    last_shot = pygame.time.get_ticks()
-
-    game_running = True
-    while game_running:
+    running = True
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_running = False
+                running = False
 
         keys = pygame.key.get_pressed()
-
         if keys[pygame.K_LEFT] and character_x - character_speed >= 0:
             character_x -= character_speed
         if keys[pygame.K_RIGHT] and character_x + character_speed + 100 <= WIDTH:
@@ -71,7 +69,6 @@ def start_game():
             character_y -= character_speed
         if keys[pygame.K_DOWN] and character_y + character_speed + 100 <= HEIGHT:
             character_y += character_speed
-
 
         current_time = pygame.time.get_ticks()
         if keys[pygame.K_SPACE] and current_time - last_shot > shoot_delay:
@@ -86,8 +83,11 @@ def start_game():
 
         bullets = [bullet for bullet in bullets if bullet[1] > 0]
 
+        update_enemies(enemies, speed=1)
+
         screen.blit(new_background_image, (0, 0))
         screen.blit(rocket, (character_x, character_y))
+        draw_enemies(enemies, screen)
         for bullet in bullets:
             pygame.draw.rect(screen, settings.Colors.WHITE, (bullet[0], bullet[1], 5, 10))
         pygame.display.flip()

@@ -9,6 +9,7 @@ class Colors:
     CIANO = (139, 219, 220)
     DARK_PINK = (255, 20, 147)
     WHITE = (255, 255, 255)
+    GREEN = (194, 255, 114)
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,3 +23,4 @@ class Sounds:
     click = os.path.join(BASE_DIR, 'sources/click-sound.mp3')
     background = os.path.join(BASE_DIR, 'sources/background-sound.mp3')
     laser = os.path.join(BASE_DIR, 'sources/laser-sound.mp3')
+    enemy_laser = os.path.join(BASE_DIR, 'sources/enemy-laser-sound.mp3')

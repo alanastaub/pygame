@@ -13,11 +13,15 @@ def draw_enemies(enemies, screen):
     for enemy in enemies:
         screen.blit(enemy["image"], (enemy["x"], enemy["y"]))
 
-def update_enemies(enemies, speed):
+def update_enemies(enemies, enemy_bullets, speed):
     for enemy in enemies:
         enemy['y'] += speed
         if enemy['lives'] <= 0:
             enemies.remove(enemy)
+        if random.randint(0, 900) < 1:  # 1% chance to shoot each frame
+            bullet_x = enemy['x'] + enemy['image'].get_width() // 2
+            bullet_y = enemy['y'] + enemy['image'].get_height()
+            enemy_bullets.append([bullet_x, bullet_y])
 
 def check_bullet_collision(bullets, enemies):
     for bullet in bullets:

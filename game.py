@@ -45,12 +45,14 @@ def start_game():
     new_background_image = pygame.image.load(settings.Images.background_game)
     new_background_image = pygame.transform.scale(new_background_image, (WIDTH, HEIGHT))
     laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
+    enemy_laser_sound = pygame.mixer.Sound(settings.Sounds.enemy_laser)
 
     rocket = pygame.image.load(settings.Images.rocket)
     rocket = pygame.transform.scale(rocket, (100, 100))
     character_x, character_y = WIDTH // 2, HEIGHT - 100
     character_speed = 5
     bullets = []
+    enemy_bullets = []
     last_shot = 0
     shoot_delay = 200
 
@@ -83,14 +85,21 @@ def start_game():
 
         bullets = [bullet for bullet in bullets if bullet[1] > 0]
 
+        for bullet in enemy_bullets:
+            bullet[1] += 5
+
+        enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT]
+
         check_bullet_collision(bullets, enemies)
-        update_enemies(enemies, speed=0.5)
+        update_enemies(enemies, enemy_bullets, speed=0.5)
 
         screen.blit(new_background_image, (0, 0))
         screen.blit(rocket, (character_x, character_y))
         draw_enemies(enemies, screen)
         for bullet in bullets:
             pygame.draw.rect(screen, settings.Colors.WHITE, (bullet[0], bullet[1], 5, 10))
+        for bullet in enemy_bullets:
+            pygame.draw.rect(screen, settings.Colors.GREEN, (bullet[0], bullet[1], 5, 10))
         pygame.display.flip()
 
     pygame.quit()

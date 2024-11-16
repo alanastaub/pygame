@@ -21,7 +21,6 @@ background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 enemy_image = pygame.image.load(settings.Images.enemy)
 enemy_image = pygame.transform.scale(enemy_image, (50, 50))
-enemies = initialize_enemies(10, enemy_image, WIDTH, HEIGHT)
 
 def draw_button(text, x, y, width, height, color, hover_color, action=None):
     click_sound = pygame.mixer.Sound(settings.Sounds.click)
@@ -41,8 +40,14 @@ def draw_button(text, x, y, width, height, color, hover_color, action=None):
     screen.blit(button_text, text_rect)
 
 def draw_rocket_lives(screen, font, lives, x, y):
-    lives_text = font.render(f'Vidas: {lives}', True, settings.Colors.WHITE)
+    font = pygame.font.Font(None, 25)
+    lives_text = font.render(f'Vidas: {lives}', True, settings.Colors.WHITE, settings.Colors.DARK_PINK)
     screen.blit(lives_text, (x, y))
+
+def draw_enemies_counter(screen, font, enemies, x, y):
+    font = pygame.font.Font(None, 25)
+    enemies_text = font.render(f'Inimigos: {enemies}', True, settings.Colors.WHITE)
+    screen.blit(enemies_text, (x, y))
 
 def start_game():
     pygame.mixer.music.set_volume(0.1)
@@ -50,9 +55,10 @@ def start_game():
     new_background_image = pygame.transform.scale(new_background_image, (WIDTH, HEIGHT))
     laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
     enemy_laser_sound = pygame.mixer.Sound(settings.Sounds.enemy_laser)
+    enemies = initialize_enemies(10, enemy_image, WIDTH, HEIGHT)
 
     rocket = pygame.image.load(settings.Images.rocket)
-    rocket = pygame.transform.scale(rocket, (100, 100))
+    rocket = pygame.transform.scale(rocket, (80, 80))
     character_x, character_y = WIDTH // 2, HEIGHT - 100
     character_speed = 5
     bullets = []
@@ -82,7 +88,7 @@ def start_game():
 
         current_time = pygame.time.get_ticks()
         if keys[pygame.K_SPACE] and current_time - last_shot > shoot_delay:
-            bullet_x = character_x + 50
+            bullet_x = character_x + 40
             bullet_y = character_y
             bullets.append([bullet_x, bullet_y])
             last_shot = current_time
@@ -98,6 +104,8 @@ def start_game():
             if character_x < bullet[0] < character_x + rocket.get_width() and \
                character_y < bullet[1] < character_y + rocket.get_height():
                 rocket_hits += 1
+                enemy_laser_sound.set_volume(0.1)
+                enemy_laser_sound.play()
                 enemy_bullets.remove(bullet)
                 if rocket_hits >= max_lives:
                     load_home()
@@ -117,6 +125,11 @@ def start_game():
             pygame.draw.rect(screen, settings.Colors.GREEN, (bullet[0], bullet[1], 5, 10))
 
         draw_rocket_lives(screen, font, max_lives - rocket_hits, 10, 10)
+        draw_enemies_counter(screen, font, len(enemies), WIDTH - 110, 10)
+
+        if len(enemies) == 0:
+            load_home()
+            return
 
         pygame.display.flip()
 

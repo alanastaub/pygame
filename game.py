@@ -40,6 +40,10 @@ def draw_button(text, x, y, width, height, color, hover_color, action=None):
     text_rect = button_text.get_rect(center=(x + width // 2, y + height // 2))
     screen.blit(button_text, text_rect)
 
+def draw_rocket_lives(screen, font, lives, x, y):
+    lives_text = font.render(f'Vidas: {lives}', True, settings.Colors.WHITE)
+    screen.blit(lives_text, (x, y))
+
 def start_game():
     pygame.mixer.music.set_volume(0.1)
     new_background_image = pygame.image.load(settings.Images.background_game)
@@ -55,6 +59,10 @@ def start_game():
     enemy_bullets = []
     last_shot = 0
     shoot_delay = 200
+    rocket_hits = 0
+    max_lives = 3
+
+    font = pygame.font.Font(None, 36)
 
     running = True
     while running:
@@ -87,6 +95,13 @@ def start_game():
 
         for bullet in enemy_bullets:
             bullet[1] += 5
+            if character_x < bullet[0] < character_x + rocket.get_width() and \
+               character_y < bullet[1] < character_y + rocket.get_height():
+                rocket_hits += 1
+                enemy_bullets.remove(bullet)
+                if rocket_hits >= max_lives:
+                    load_home()
+                    return
 
         enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT]
 
@@ -100,6 +115,9 @@ def start_game():
             pygame.draw.rect(screen, settings.Colors.WHITE, (bullet[0], bullet[1], 5, 10))
         for bullet in enemy_bullets:
             pygame.draw.rect(screen, settings.Colors.GREEN, (bullet[0], bullet[1], 5, 10))
+
+        draw_rocket_lives(screen, font, max_lives - rocket_hits, 10, 10)
+
         pygame.display.flip()
 
     pygame.quit()

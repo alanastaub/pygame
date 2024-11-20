@@ -1,5 +1,6 @@
 import pygame
 import random
+from settings import General
 
 def initialize_enemies(num_enemies, enemy_image, width, height):
     enemies = []
@@ -18,10 +19,14 @@ def update_enemies(enemies, enemy_bullets, speed):
         enemy['y'] += speed
         if enemy['lives'] <= 0:
             enemies.remove(enemy)
-        if random.randint(0, 900) < 1:  # 1% chance to shoot each frame
+        if random.randint(0, 900) < 1:  
             bullet_x = enemy['x'] + enemy['image'].get_width() // 2
             bullet_y = enemy['y'] + enemy['image'].get_height()
             enemy_bullets.append([bullet_x, bullet_y])
+        if enemy['y'] + enemy['image'].get_height() > General.HEIGHT:
+            return True
+
+    return False
 
 def check_bullet_collision(bullets, enemies):
     for bullet in bullets:

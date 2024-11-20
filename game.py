@@ -39,6 +39,11 @@ def draw_button(text, x, y, width, height, color, hover_color, action=None):
     text_rect = button_text.get_rect(center=(x + width // 2, y + height // 2))
     screen.blit(button_text, text_rect)
 
+def draw_score(screen, font, score, x, y):
+    font = pygame.font.Font(None, 36)
+    score_text = font.render(f'Score: {score}', True, settings.Colors.WHITE)
+    screen.blit(score_text, (x, y))
+
 def draw_rocket_lives(screen, font, lives, x, y):
     font = pygame.font.Font(None, 25)
     lives_text = font.render(f'Vidas: {lives}', True, settings.Colors.WHITE, settings.Colors.DARK_PINK)
@@ -55,7 +60,7 @@ def start_game():
     new_background_image = pygame.transform.scale(new_background_image, (WIDTH, HEIGHT))
     laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
     enemy_laser_sound = pygame.mixer.Sound(settings.Sounds.enemy_laser)
-    enemies = initialize_enemies(10, enemy_image, WIDTH, HEIGHT)
+    enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT)
 
     rocket = pygame.image.load(settings.Images.rocket)
     rocket = pygame.transform.scale(rocket, (60, 60))
@@ -67,6 +72,7 @@ def start_game():
     shoot_delay = 200
     rocket_hits = 0
     max_lives = 3
+    score = 0
 
     font = pygame.font.Font(None, 36)
 
@@ -92,6 +98,7 @@ def start_game():
             bullet_y = rocket_y
             bullets.append([bullet_x, bullet_y])
             last_shot = current_time
+            laser_sound.set_volume(0.5)
             laser_sound.play()
 
         for bullet in bullets:
@@ -108,6 +115,7 @@ def start_game():
             if rocket_x < bullet[0] < rocket_x + rocket.get_width() and \
                rocket_y < bullet[1] < rocket_y + rocket.get_height():
                 rocket_hits += 1
+                score -= 10
                 enemy_laser_sound.set_volume(0.1)
                 enemy_laser_sound.play()
                 enemy_bullets.remove(bullet)
@@ -117,8 +125,10 @@ def start_game():
 
         enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT]
 
+        enemies_count_before = len(enemies)
         check_bullet_collision(bullets, enemies)
-        if update_enemies(enemies, enemy_bullets, speed=1):
+        score += (enemies_count_before - len(enemies)) * 100
+        if update_enemies(enemies, enemy_bullets, speed=0.5):
             load_home()
             return
 
@@ -132,6 +142,7 @@ def start_game():
 
         draw_rocket_lives(screen, font, max_lives - rocket_hits, 10, 10)
         draw_enemies_counter(screen, font, len(enemies), WIDTH - 110, 10)
+        draw_score(screen, font, score, WIDTH // 2 - 50, 10)
 
         if len(enemies) == 0:
             load_home()

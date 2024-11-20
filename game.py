@@ -4,80 +4,47 @@ import sound
 import settings
 import random
 from enemies import initialize_enemies, draw_enemies, update_enemies, check_bullet_collision
+from draw import draw_button, draw_score, draw_rocket_lives, draw_enemies_counter
 
-pygame.init()
+pygame.init() # Inicializa o pygame
 
-sound.start_music()
+sound.start_music() # Inicia a música de fundo
 
-WIDTH, HEIGHT = settings.General.WIDTH, settings.General.HEIGHT
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Space Invaders")
+WIDTH, HEIGHT = settings.General.WIDTH, settings.General.HEIGHT # Largura e altura da tela
+screen = pygame.display.set_mode((WIDTH, HEIGHT)) # Cria a tela
+pygame.display.set_caption("Space Invaders") # Define o título da janela
 
-pygame.font.init()
-button_font = pygame.font.Font(None, 30)
+pygame.font.init() # Inicializa as fontes
+button_font = pygame.font.Font(None, 30) # Define a fonte dos botões
 
-background_image = pygame.image.load(settings.Images.background_home)
-background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+# Carrega as imagens
+background_image = pygame.image.load(settings.Images.background_home) # Carrega a imagem de fundo da tela inicial
+background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT)) # Redimensiona a imagem para o tamanho da tela
 
-background_loss = pygame.image.load(settings.Images.background_loss)
-background_loss = pygame.transform.scale(background_loss, (WIDTH, HEIGHT))
+background_loss = pygame.image.load(settings.Images.background_loss) # Carrega a imagem de fundo da tela de derrota
+background_loss = pygame.transform.scale(background_loss, (WIDTH, HEIGHT)) # Redimensiona a imagem para o tamanho da tela
 
-background_win = pygame.image.load(settings.Images.background_win)
-background_win = pygame.transform.scale(background_win, (WIDTH, HEIGHT))
+background_win = pygame.image.load(settings.Images.background_win) # Carrega a imagem de fundo da tela de vitória
+background_win = pygame.transform.scale(background_win, (WIDTH, HEIGHT)) # Redimensiona a imagem para o tamanho da tela
 
-enemy_image = pygame.image.load(settings.Images.enemy)
-enemy_image = pygame.transform.scale(enemy_image, (50, 50))
+new_background_image = pygame.image.load(settings.Images.background_game) # Carrega a imagem de fundo do jogo em execução
+new_background_image = pygame.transform.scale(new_background_image, (WIDTH, HEIGHT)) # Redimensiona a imagem para o tamanho da tela
 
-def draw_button(text, x, y, width, height, color, hover_color, action=None):
-    click_sound = pygame.mixer.Sound(settings.Sounds.click)
-    mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed()
+enemy_image = pygame.image.load(settings.Images.enemy) # Carrega a imagem do inimigo
+enemy_image = pygame.transform.scale(enemy_image, (50, 50)) # Redimensiona a imagem do inimigo
 
-    if x < mouse[0] < x + width and y < mouse[1] < y + height:
-        pygame.draw.rect(screen, hover_color, (x, y, width, height))
-        if click[0] == 1 and action:
-            click_sound.play()
-            action()
-    else:
-        pygame.draw.rect(screen, color, (x, y, width, height))
-
-    button_text = button_font.render(text, True, settings.Colors.WHITE)
-    text_rect = button_text.get_rect(center=(x + width // 2, y + height // 2))
-    screen.blit(button_text, text_rect)
-
-def draw_score(screen, font, score, x, y, font_size=36):
-    font = pygame.font.Font(None, font_size)
-    score_text = font.render(f'Pontos: {score}', True, settings.Colors.WHITE)
-    screen.blit(score_text, (x, y))
-
-def draw_rocket_lives(screen, font, lives, x, y):
-    font = pygame.font.Font(None, 25)
-    lives_text = font.render(f'Vidas: {lives}', True, settings.Colors.WHITE, settings.Colors.DARK_PINK)
-    screen.blit(lives_text, (x, y))
-
-def draw_enemies_counter(screen, font, enemies, x, y):
-    font = pygame.font.Font(None, 25)
-    enemies_text = font.render(f'Inimigos: {enemies}', True, settings.Colors.WHITE)
-    screen.blit(enemies_text, (x, y))
-
-def draw_winner(screen, font, x, y, is_winner):
-    font = pygame.font.Font(None, 100)
-    text = "Você Ganhou!" if is_winner else "Você Perdeu!"
-    text = font.render(text, True, settings.Colors.GREEN if is_winner else settings.Colors.RED)
-    screen.blit(text, (x, y))
+rocket = pygame.image.load(settings.Images.rocket) # Carrega a imagem da nave
+rocket = pygame.transform.scale(rocket, (60, 60)) # Redimensiona a imagem da nave
 
 def start_game():
+    rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100
+
     global show_home, score, is_winner
     pygame.mixer.music.set_volume(0.1)
-    new_background_image = pygame.image.load(settings.Images.background_game)
-    new_background_image = pygame.transform.scale(new_background_image, (WIDTH, HEIGHT))
     laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
     enemy_laser_sound = pygame.mixer.Sound(settings.Sounds.enemy_laser)
-    enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT)
 
-    rocket = pygame.image.load(settings.Images.rocket)
-    rocket = pygame.transform.scale(rocket, (60, 60))
-    rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100
+    enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT)
     rocket_speed = 5
     bullets = []
     enemy_bullets = []
@@ -179,16 +146,15 @@ def show_game_over():
     screen.blit(background_win if is_winner else background_loss, (0, 0))
     draw_score(screen, button_font, score, WIDTH // 2 - 100, 300)
 
-    draw_button("Jogar Novamente", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
-    draw_button("Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
-
+    draw_button(screen, "Jogar Novamente", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
+    draw_button(screen, "Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
 
 
 def load_home():
     screen.blit(background_image, (0, 0))
 
-    draw_button("Jogar", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
-    draw_button("Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
+    draw_button(screen, "Jogar", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
+    draw_button(screen, "Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
 
 
 running = True

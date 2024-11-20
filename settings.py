@@ -1,5 +1,5 @@
 import os
-
+#Arquivo de configurções gerais do jogo, como cores, imagens, sons, etc.
 class General:
     WIDTH = 800
     HEIGHT = 600
@@ -13,6 +13,7 @@ class Colors:
     RED = (255, 0, 0)
 
 
+#Caminho das imagens e sons
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 class Images:
     rocket = os.path.join(BASE_DIR, 'sources/rocket.png')

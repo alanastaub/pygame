@@ -19,6 +19,12 @@ button_font = pygame.font.Font(None, 30)
 background_image = pygame.image.load(settings.Images.background_home)
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
+background_loss = pygame.image.load(settings.Images.background_loss)
+background_loss = pygame.transform.scale(background_loss, (WIDTH, HEIGHT))
+
+background_win = pygame.image.load(settings.Images.background_win)
+background_win = pygame.transform.scale(background_win, (WIDTH, HEIGHT))
+
 enemy_image = pygame.image.load(settings.Images.enemy)
 enemy_image = pygame.transform.scale(enemy_image, (50, 50))
 
@@ -39,9 +45,9 @@ def draw_button(text, x, y, width, height, color, hover_color, action=None):
     text_rect = button_text.get_rect(center=(x + width // 2, y + height // 2))
     screen.blit(button_text, text_rect)
 
-def draw_score(screen, font, score, x, y):
-    font = pygame.font.Font(None, 36)
-    score_text = font.render(f'Score: {score}', True, settings.Colors.WHITE)
+def draw_score(screen, font, score, x, y, font_size=36):
+    font = pygame.font.Font(None, font_size)
+    score_text = font.render(f'Pontos: {score}', True, settings.Colors.WHITE)
     screen.blit(score_text, (x, y))
 
 def draw_rocket_lives(screen, font, lives, x, y):
@@ -54,7 +60,14 @@ def draw_enemies_counter(screen, font, enemies, x, y):
     enemies_text = font.render(f'Inimigos: {enemies}', True, settings.Colors.WHITE)
     screen.blit(enemies_text, (x, y))
 
+def draw_winner(screen, font, x, y, is_winner):
+    font = pygame.font.Font(None, 100)
+    text = "Você Ganhou!" if is_winner else "Você Perdeu!"
+    text = font.render(text, True, settings.Colors.GREEN if is_winner else settings.Colors.RED)
+    screen.blit(text, (x, y))
+
 def start_game():
+    global show_home, score, is_winner
     pygame.mixer.music.set_volume(0.1)
     new_background_image = pygame.image.load(settings.Images.background_game)
     new_background_image = pygame.transform.scale(new_background_image, (WIDTH, HEIGHT))
@@ -107,7 +120,8 @@ def start_game():
         bullets = [bullet for bullet in bullets if bullet[1] > 0]
 
         if (rocket_y + 5 < 0):
-            load_home()
+            show_home = False
+            is_winner = True
             return
 
         for bullet in enemy_bullets:
@@ -120,7 +134,8 @@ def start_game():
                 enemy_laser_sound.play()
                 enemy_bullets.remove(bullet)
                 if rocket_hits >= max_lives:
-                    load_home()
+                    show_home = False
+                    is_winner = False
                     return
 
         enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT]
@@ -129,7 +144,8 @@ def start_game():
         check_bullet_collision(bullets, enemies)
         score += (enemies_count_before - len(enemies)) * 100
         if update_enemies(enemies, enemy_bullets, speed=0.5):
-            load_home()
+            show_home = False
+            is_winner = False
             return
 
         screen.blit(new_background_image, (0, 0))
@@ -145,7 +161,8 @@ def start_game():
         draw_score(screen, font, score, WIDTH // 2 - 50, 10)
 
         if len(enemies) == 0:
-            load_home()
+            show_home = False
+            is_winner = True
             return
 
         pygame.display.flip()
@@ -158,15 +175,28 @@ def quit_game():
     pygame.quit()
     sys.exit()
 
+def show_game_over():
+    screen.blit(background_win if is_winner else background_loss, (0, 0))
+    draw_score(screen, button_font, score, WIDTH // 2 - 100, 300)
+
+    draw_button("Jogar Novamente", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
+    draw_button("Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
+
+
+
 def load_home():
     screen.blit(background_image, (0, 0))
 
     draw_button("Jogar", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
     draw_button("Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
 
+
 running = True
+show_home = True
+is_winner = False
+score = 0
 while running:
-    load_home()
+    load_home() if show_home else show_game_over()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

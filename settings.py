@@ -10,6 +10,7 @@ class Colors:
     DARK_PINK = (255, 20, 147)
     WHITE = (255, 255, 255)
     GREEN = (194, 255, 114)
+    RED = (255, 0, 0)
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +19,8 @@ class Images:
     background_home = os.path.join(BASE_DIR, 'sources/background-home.png')
     background_game = os.path.join(BASE_DIR, 'sources/background-game.png')
     enemy = os.path.join(BASE_DIR, 'sources/enemy.png')
+    background_loss = os.path.join(BASE_DIR, 'sources/background-loss.png')
+    background_win = os.path.join(BASE_DIR, 'sources/background-win.png')
 
 class Sounds:
     click = os.path.join(BASE_DIR, 'sources/click-sound.mp3')

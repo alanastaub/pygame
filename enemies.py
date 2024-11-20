@@ -16,7 +16,7 @@ def draw_enemies(enemies, screen):
             pygame.draw.circle(screen, (255, 0, 0), (enemy["x"] + i * 12 + 12, enemy["y"] - 5), 4)
         screen.blit(enemy["image"], (enemy["x"], enemy["y"]))
 
-def update_enemies(enemies, enemy_bullets, speed):
+def update_enemies(enemies, enemy_bullets, speed, enemy_reached_base):
     for enemy in enemies:
         enemy['y'] += speed
         if enemy['lives'] <= 0:
@@ -26,17 +26,21 @@ def update_enemies(enemies, enemy_bullets, speed):
             bullet_y = enemy['y'] + enemy['image'].get_height()
             enemy_bullets.append([bullet_x, bullet_y])
         if enemy['y'] + enemy['image'].get_height() > General.HEIGHT:
-            return True
+            enemy_reached_base = True
 
-    return False
+    return enemy_reached_base
 
-def check_bullet_collision(bullets, enemies):
+def check_bullet_collision(bullets, enemies, score):
     for bullet in bullets:
         for enemy in enemies:
             if enemy['x'] < bullet[0] < enemy['x'] + enemy['image'].get_width() and \
                enemy['y'] < bullet[1] < enemy['y'] + enemy['image'].get_height():
                 enemy['lives'] -= 1
+                score += 10
                 bullets.remove(bullet)
                 if enemy['lives'] <= 0:
+                    score += 100
                     enemies.remove(enemy)
                 break
+
+    return score

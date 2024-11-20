@@ -36,6 +36,36 @@ enemy_image = pygame.transform.scale(enemy_image, (50, 50)) # Redimensiona a ima
 rocket = pygame.image.load(settings.Images.rocket) # Carrega a imagem da nave
 rocket = pygame.transform.scale(rocket, (60, 60)) # Redimensiona a imagem da nave
 
+# Função para tratar a entrada do usuário
+def handle_input(rocket_x, rocket_y, bullets, last_shot, laser_sound):
+    rocket_speed = 5 # Velocidade da nave
+    shoot_delay = 200 # Delay entre os tiros
+
+    keys = pygame.key.get_pressed() # Pega as teclas pressionadas
+
+    if keys[pygame.K_LEFT] and rocket_x - rocket_speed >= -20: # Verifica se a seta esquerda foi pressionada
+        rocket_x -= rocket_speed # Move a nave para a esquerda
+    if keys[pygame.K_RIGHT] and rocket_x + rocket_speed + 50 <= WIDTH: # Verifica se a seta direita foi pressionada
+        rocket_x += rocket_speed # Move a nave para a direita
+    if keys[pygame.K_UP] and rocket_y - rocket_speed >= -10: # Verifica se a seta para cima foi pressionada
+        rocket_y -= rocket_speed # Move a nave para cima
+    if keys[pygame.K_DOWN] and rocket_y + rocket_speed + 50 <= HEIGHT: # Verifica se a seta para baixo foi pressionada
+        rocket_y += rocket_speed # Move a nave para baixo
+
+    current_time = pygame.time.get_ticks() # Pega o tempo atual
+
+    # Verifica se a barra de espaço foi pressionada e se o tempo do último tiro é maior que o delay entre os tiros
+    if keys[pygame.K_SPACE] and current_time - last_shot > shoot_delay:
+        bullet_x = rocket_x + 28 # Posição x do tiro
+        bullet_y = rocket_y # Posição y do tiro
+        bullets.append([bullet_x, bullet_y]) # Adiciona o tiro à lista de tiros
+        last_shot = current_time # Atualiza o tempo do último tiro
+        laser_sound.set_volume(0.3) # Define o volume do som do tiro
+        laser_sound.play() # Toca o som do tiro
+
+    return rocket_x, rocket_y, bullets, last_shot # Retorna a posição da nave, a lista de tiros e o tempo do último tiro
+
+
 def start_game():
     rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100
 
@@ -62,24 +92,7 @@ def start_game():
             if event.type == pygame.QUIT:
                 running = False
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and rocket_x - rocket_speed >= -20:
-            rocket_x -= rocket_speed
-        if keys[pygame.K_RIGHT] and rocket_x + rocket_speed + 50 <= WIDTH:
-            rocket_x += rocket_speed
-        if keys[pygame.K_UP] and rocket_y - rocket_speed >= -10:
-            rocket_y -= rocket_speed
-        if keys[pygame.K_DOWN] and rocket_y + rocket_speed + 50 <= HEIGHT:
-            rocket_y += rocket_speed
-
-        current_time = pygame.time.get_ticks()
-        if keys[pygame.K_SPACE] and current_time - last_shot > shoot_delay:
-            bullet_x = rocket_x + 28
-            bullet_y = rocket_y
-            bullets.append([bullet_x, bullet_y])
-            last_shot = current_time
-            laser_sound.set_volume(0.5)
-            laser_sound.play()
+        rocket_x, rocket_y, bullets, last_shot = handle_input(rocket_x, rocket_y, bullets, last_shot, laser_sound)
 
         for bullet in bullets:
             bullet[1] -= 10

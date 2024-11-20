@@ -87,23 +87,30 @@ def update_enemies_bullets(enemy_bullets, rocket_x, rocket_y, rocket_hits, max_l
                 enemy_laser_sound.play() # Toca o som do tiro do inimigo
                 enemy_bullets.remove(bullet) # Remove o tiro da lista
 
-                # Verifica se o número de vidas perdidas é igual ao número máximo de vidas
-                if rocket_hits >= max_lives:
-                    show_home = False
-                    is_winner = False
-                    return
-
     enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT] # Remove os tiros que saíram da tela
-    return enemy_bullets, score
+    return enemy_bullets, score, rocket_hits
+
+def check_game_over(enemies, rocket_hits, rocket_y, max_lives, enemy_reached_base, score, again, is_winner):
+    # se todos os inimigos foram eliminados ou a nave ultrapassou a tela superior a nave vence
+    if len(enemies) == 0 or rocket_y + 5 < 0:
+        is_winner = True
+        again = False
+
+    # se a nave foi atingida 3 vezes ou um inimigo ultrapassou a tela inferior a nave perde
+    if rocket_hits >= max_lives or enemy_reached_base:
+        is_winner = False
+        again = False
+
+    return again, is_winner
 
 def start_game():
     rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100
 
-    global show_home, score, is_winner
+    global score, show_home, is_winner
+    show_home = False
     pygame.mixer.music.set_volume(0.1)
     laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
     
-
     enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT)
     rocket_speed = 5
     bullets = []
@@ -113,6 +120,8 @@ def start_game():
     rocket_hits = 0
     max_lives = 3
     score = 50
+    again = True
+    enemy_reached_base = False
 
     font = pygame.font.Font(None, 36)
 
@@ -125,36 +134,29 @@ def start_game():
         rocket_x, rocket_y, bullets, last_shot = handle_input(rocket_x, rocket_y, bullets, last_shot, laser_sound)
         bullets = update_rocker_bullets(bullets)
 
-        if (rocket_y + 5 < 0):
-            show_home = False
-            is_winner = True
-            return
+        enemy_bullets, score, rocket_hits = update_enemies_bullets(enemy_bullets, rocket_x, rocket_y, rocket_hits, max_lives, score)
 
-        enemy_bullets, score = update_enemies_bullets(enemy_bullets, rocket_x, rocket_y, rocket_hits, max_lives, score)
+        score = check_bullet_collision(bullets, enemies, score)
+        enemy_reached_base = update_enemies(enemies, enemy_bullets, speed=0.5, enemy_reached_base=enemy_reached_base)
 
-        enemies_count_before = len(enemies)
-        check_bullet_collision(bullets, enemies)
-        score += (enemies_count_before - len(enemies)) * 100
-        if update_enemies(enemies, enemy_bullets, speed=0.5):
-            show_home = False
-            is_winner = False
-            return
-
+        # Desenha a nave, os inimigos e o fundo
         screen.blit(new_background_image, (0, 0))
         screen.blit(rocket, (rocket_x, rocket_y))
         draw_enemies(enemies, screen)
+
+        # Desenha os tiros
         for bullet in bullets:
             pygame.draw.rect(screen, settings.Colors.WHITE, (bullet[0], bullet[1], 5, 10))
         for bullet in enemy_bullets:
             pygame.draw.rect(screen, settings.Colors.GREEN, (bullet[0], bullet[1], 5, 10))
 
-        draw_rocket_lives(screen, font, max_lives - rocket_hits, 10, 10)
-        draw_enemies_counter(screen, font, len(enemies), WIDTH - 110, 10)
-        draw_score(screen, font, score, WIDTH // 2 - 50, 10)
+        # Desenha as informações na tela
+        draw_rocket_lives(screen, font, max_lives - rocket_hits, 10, 10) # Desenha as vidas da nave
+        draw_enemies_counter(screen, font, len(enemies), WIDTH - 110, 10) # Desenha a quantidade de inimigos
+        draw_score(screen, font, score, WIDTH // 2 - 50, 10) # Desenha a pontuação
 
-        if len(enemies) == 0:
-            show_home = False
-            is_winner = True
+        again, is_winner = check_game_over(enemies, rocket_hits, rocket_y, max_lives, enemy_reached_base, score, again, is_winner)
+        if not again:
             return
 
         pygame.display.flip()

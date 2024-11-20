@@ -77,13 +77,13 @@ def start_game():
                 running = False
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT] and rocket_x - rocket_speed >= -40:
+        if keys[pygame.K_LEFT] and rocket_x - rocket_speed >= -20:
             rocket_x -= rocket_speed
-        if keys[pygame.K_RIGHT] and rocket_x + rocket_speed + 60 <= WIDTH:
+        if keys[pygame.K_RIGHT] and rocket_x + rocket_speed + 50 <= WIDTH:
             rocket_x += rocket_speed
         if keys[pygame.K_UP] and rocket_y - rocket_speed >= -10:
             rocket_y -= rocket_speed
-        if keys[pygame.K_DOWN] and rocket_y + rocket_speed + 100 <= HEIGHT:
+        if keys[pygame.K_DOWN] and rocket_y + rocket_speed + 50 <= HEIGHT:
             rocket_y += rocket_speed
 
         current_time = pygame.time.get_ticks()
@@ -98,6 +98,10 @@ def start_game():
             bullet[1] -= 10
 
         bullets = [bullet for bullet in bullets if bullet[1] > 0]
+
+        if (rocket_y + 5 < 0):
+            load_home()
+            return
 
         for bullet in enemy_bullets:
             bullet[1] += 5

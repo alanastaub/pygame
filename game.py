@@ -104,24 +104,24 @@ def check_game_over(enemies, rocket_hits, rocket_y, max_lives, enemy_reached_bas
     return again, is_winner
 
 def start_game():
-    rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100
+    rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100 # Posição inicial da nave
 
-    global score, show_home, is_winner
-    show_home = False
-    pygame.mixer.music.set_volume(0.1)
-    laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
+    global score, show_home, is_winner # Define as variáveis como globais para poder alterá-las
+    show_home = False # Define a tela inicial como não visível
+    pygame.mixer.music.set_volume(0.1) # Define o volume da música de fundo
+    laser_sound = pygame.mixer.Sound(settings.Sounds.laser) # Carrega o som do tiro
     
-    enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT)
-    rocket_speed = 5
-    bullets = []
-    enemy_bullets = []
-    last_shot = 0
-    shoot_delay = 200
-    rocket_hits = 0
-    max_lives = 3
-    score = 50
-    again = True
-    enemy_reached_base = False
+    enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT) # Inicializa os inimigos
+    rocket_speed = 5 # Velocidade da nave
+    bullets = [] # Lista de tiros da nave
+    enemy_bullets = [] # Lista de tiros dos inimigos
+    last_shot = 0 # Tempo do último tiro
+    shoot_delay = 200 # Delay entre os tiros
+    rocket_hits = 0 # Número de vidas perdidas
+    max_lives = 3 # Número máximo de vidas
+    score = 50 # Pontuação inicial
+    again = True # Variável para reiniciar o jogo
+    enemy_reached_base = False # Variável para verificar se um inimigo ultrapassou a tela inferior
 
     font = pygame.font.Font(None, 36)
 
@@ -131,11 +131,12 @@ def start_game():
             if event.type == pygame.QUIT:
                 running = False
 
+        # Atualiza a posição da nave, dos tiros e dos inimigos
         rocket_x, rocket_y, bullets, last_shot = handle_input(rocket_x, rocket_y, bullets, last_shot, laser_sound)
         bullets = update_rocker_bullets(bullets)
-
         enemy_bullets, score, rocket_hits = update_enemies_bullets(enemy_bullets, rocket_x, rocket_y, rocket_hits, max_lives, score)
 
+        # Verifica se houve colisão entre os tiros e os inimigos
         score = check_bullet_collision(bullets, enemies, score)
         enemy_reached_base = update_enemies(enemies, enemy_bullets, speed=0.5, enemy_reached_base=enemy_reached_base)
 
@@ -160,27 +161,29 @@ def start_game():
         if not again:
             return
 
-        pygame.display.flip()
+        pygame.display.flip() # Atualiza a tela
 
     pygame.quit()
     sys.exit()
 
 
 def quit_game():
-    pygame.quit()
-    sys.exit()
+    pygame.quit() # Finaliza o pygame
+    sys.exit() # Finaliza o programa
 
 def show_game_over():
-    screen.blit(background_win if is_winner else background_loss, (0, 0))
-    draw_score(screen, button_font, score, WIDTH // 2 - 100, 300)
+    screen.blit(background_win if is_winner else background_loss, (0, 0)) # Mostra a tela de vitória ou derrota
+    draw_score(screen, button_font, score, WIDTH // 2 - 100, 300) # Desenha a pontuação
 
+    # Desenha os botões
     draw_button(screen, "Jogar Novamente", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
     draw_button(screen, "Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
 
 
 def load_home():
-    screen.blit(background_image, (0, 0))
+    screen.blit(background_image, (0, 0)) # Mostra a imagem de fundo
 
+    # Desenha os botões
     draw_button(screen, "Jogar", WIDTH // 2 - 100, 350, 200, 40, settings.Colors.PINK, settings.Colors.DARK_PINK, start_game)
     draw_button(screen, "Sair", WIDTH // 2 - 100, 400, 200, 40, settings.Colors.CIANO, settings.Colors.DARK_PINK, quit_game)
 

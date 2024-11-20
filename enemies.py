@@ -12,6 +12,8 @@ def initialize_enemies(num_enemies, enemy_image, width, height):
 
 def draw_enemies(enemies, screen):
     for enemy in enemies:
+        for i in range(enemy["lives"]):
+            pygame.draw.circle(screen, (255, 0, 0), (enemy["x"] + i * 12 + 12, enemy["y"] - 5), 4)
         screen.blit(enemy["image"], (enemy["x"], enemy["y"]))
 
 def update_enemies(enemies, enemy_bullets, speed):

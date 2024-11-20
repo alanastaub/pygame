@@ -155,6 +155,7 @@ def start_game():
         draw_enemies_counter(screen, font, len(enemies), WIDTH - 110, 10) # Desenha a quantidade de inimigos
         draw_score(screen, font, score, WIDTH // 2 - 50, 10) # Desenha a pontuação
 
+        # Verifica se o jogo acabou
         again, is_winner = check_game_over(enemies, rocket_hits, rocket_y, max_lives, enemy_reached_base, score, again, is_winner)
         if not again:
             return

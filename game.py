@@ -65,6 +65,36 @@ def handle_input(rocket_x, rocket_y, bullets, last_shot, laser_sound):
 
     return rocket_x, rocket_y, bullets, last_shot # Retorna a posição da nave, a lista de tiros e o tempo do último tiro
 
+# Função para atualizar a posição dos tiros da nave
+def update_rocker_bullets(bullets):
+    for bullet in bullets:
+            bullet[1] -= 10 # Atualiza a posição y do tiro
+
+    bullets = [bullet for bullet in bullets if bullet[1] > 0] # Remove os tiros que saíram da tela
+    return bullets
+
+# Função para atualizar a posição dos tiros dos inimigos
+def update_enemies_bullets(enemy_bullets, rocket_x, rocket_y, rocket_hits, max_lives, score):
+    enemy_laser_sound = pygame.mixer.Sound(settings.Sounds.enemy_laser)
+
+    for bullet in enemy_bullets:
+            bullet[1] += 5 # Atualiza a posição y do tiro
+            if rocket_x < bullet[0] < rocket_x + rocket.get_width() and \
+               rocket_y < bullet[1] < rocket_y + rocket.get_height(): # Verifica se o tiro atingiu a nave
+                rocket_hits += 1 # Incrementa o número de vidas perdidas
+                score -= 10 # Decrementa a pontuação
+                enemy_laser_sound.set_volume(0.1) # Define o volume do som do tiro do inimigo
+                enemy_laser_sound.play() # Toca o som do tiro do inimigo
+                enemy_bullets.remove(bullet) # Remove o tiro da lista
+
+                # Verifica se o número de vidas perdidas é igual ao número máximo de vidas
+                if rocket_hits >= max_lives:
+                    show_home = False
+                    is_winner = False
+                    return
+
+    enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT] # Remove os tiros que saíram da tela
+    return enemy_bullets, score
 
 def start_game():
     rocket_x, rocket_y = WIDTH // 2, HEIGHT - 100
@@ -72,7 +102,7 @@ def start_game():
     global show_home, score, is_winner
     pygame.mixer.music.set_volume(0.1)
     laser_sound = pygame.mixer.Sound(settings.Sounds.laser)
-    enemy_laser_sound = pygame.mixer.Sound(settings.Sounds.enemy_laser)
+    
 
     enemies = initialize_enemies(20, enemy_image, WIDTH, HEIGHT)
     rocket_speed = 5
@@ -82,7 +112,7 @@ def start_game():
     shoot_delay = 200
     rocket_hits = 0
     max_lives = 3
-    score = 0
+    score = 50
 
     font = pygame.font.Font(None, 36)
 
@@ -93,32 +123,14 @@ def start_game():
                 running = False
 
         rocket_x, rocket_y, bullets, last_shot = handle_input(rocket_x, rocket_y, bullets, last_shot, laser_sound)
-
-        for bullet in bullets:
-            bullet[1] -= 10
-
-        bullets = [bullet for bullet in bullets if bullet[1] > 0]
+        bullets = update_rocker_bullets(bullets)
 
         if (rocket_y + 5 < 0):
             show_home = False
             is_winner = True
             return
 
-        for bullet in enemy_bullets:
-            bullet[1] += 5
-            if rocket_x < bullet[0] < rocket_x + rocket.get_width() and \
-               rocket_y < bullet[1] < rocket_y + rocket.get_height():
-                rocket_hits += 1
-                score -= 10
-                enemy_laser_sound.set_volume(0.1)
-                enemy_laser_sound.play()
-                enemy_bullets.remove(bullet)
-                if rocket_hits >= max_lives:
-                    show_home = False
-                    is_winner = False
-                    return
-
-        enemy_bullets = [bullet for bullet in enemy_bullets if bullet[1] < HEIGHT]
+        enemy_bullets, score = update_enemies_bullets(enemy_bullets, rocket_x, rocket_y, rocket_hits, max_lives, score)
 
         enemies_count_before = len(enemies)
         check_bullet_collision(bullets, enemies)
